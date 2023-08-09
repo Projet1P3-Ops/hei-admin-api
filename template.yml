@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless API
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  SamFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 60
+      #AutoPublishAlias: snap
+      #SnapStart:
+      #  ApplyOn: PublishedVersions
+      Architectures:
+        - x86_64
+      Events:
+        HttpApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      DockerTag: hei-admin
+      DockerContext: ./
+      Dockerfile: Dockerfile
+
+#  ServerlessHttpApi:
+#    Type: AWS::Serverless::HttpApi
+#    Properties:
+#      StageName: prod
+
+Outputs:
+  HttpApiUrl:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/"
