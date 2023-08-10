@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Description: 'AWS SAM Spring Boot App'
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+  Tag:
+    Type: String
+    Default: latest
+  AccessKeyId:
+    Type: String
+  SecretAccessKey:
+    Type: String
+  DatabaseUrl:
+    Type: String
+    Description: Database Url
+  DatabaseUsername:
+    Type: String
+    Description: Database Username
+  DatabasePassword:
+    Type: String
+    Description: Database Password
+  CognitoUserPoolId:
+    Type: String
+  EventBridgeBus:
+    Type: String
+  SqsQueueUrl:
+    Type: String
+  SesSource:
+    Type: String
+  SesContact:
+    Type: String
+  SentryDsn:
+    Type: String
+
+Resources:
+  SamSpringApplication:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: 088312068315.dkr.ecr.eu-west-3.amazonaws.com/lambda-hei-admin:0.7.0
+      Environment:
+        Variables:
+          ENV: !Ref Env
+          AWS_ACCESSKEYID: !Ref AccessKeyId
+          AWS_SECRETACCESSKEY: !Sub SecretAccessKey
+          AWS_COGNITO_USERPOOL_ID: !Ref CognitoUserPoolId
+          AWS_EVENTBRIDGE_BUS: !Ref EventBridgeBus
+          AWS_SQS_QUEUEURL: !Ref SqsQueueUrl
+          AWS_SES_SOURCE: !Ref SesSource
+          AWS_SES_CONTACT: !Ref SesContact
+          SPRING_DATASOURCE_URL: !Ref DatabaseUrl
+          SPRING_DATASOURCE_USERNAME: !Ref DatabaseUsername
+          SPRING_DATASOURCE_PASSWORD: !Ref DatabasePassword
+          SENTRY_DSN: !Ref SentryDsn
+      ImageConfig:
+        Command:
+          - school.hei.haapi.LambdaHandler:handleRequest
+      Architectures:
+        - x86_64
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0c1a7a68a55e871cf
+        SubnetIds:
+          - subnet-0df32d195a1186ce2
+          - subnet-09b545e92f0920b86
+      MemorySize: 1024
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
