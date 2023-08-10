@@ -1,0 +1,10 @@
+config:
+  target: ''
+  phases:
+    - duration: 30
+      arrivalRate: 100
+
+scenarios:
+  - flow:
+      - get:
+          url: '/ping'

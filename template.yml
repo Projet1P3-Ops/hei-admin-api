@@ -6,19 +6,45 @@ Globals:
   Function:
     Timeout: 30
 
+Parameters:
+  springDataSourceUrl:
+    Type: String
+    Description: Spring Boot datasource URL
+  springDataSourceUsername:
+    Type: String
+    Description: Spring Boot datasource Username
+  springDataSourcePassword:
+    Type: String
+    Description: Spring Boot datasource Password
+
 Resources:
   SamFunction:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
+      Properties:
+        PackageType: Image
+        ImageConfig:
+          Command:
+            - "snap"
+            - "start"
+            - "school.hei.haapi.LambdaHandler::handleRequest"
       CodeUri: .
-      MemorySize: 512
+      MemorySize: 1024
       Timeout: 60
-      #AutoPublishAlias: snap
-      #SnapStart:
-      #  ApplyOn: PublishedVersions
+      Environment:
+        Variables:
+          SPRING_DATASOURCE_URL: !Ref springDataSourceUrl
+          SPRING_DATASOURCE_USERNAME: !Ref springDataSourceUsername
+          SPRING_DATASOURCE_PASSWORD: !Ref springDataSourcePassword
       Architectures:
         - x86_64
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0c1a7a68a55e871cf
+        SubnetIds:
+          - subnet-0df32d195a1186ce2
+          - subnet-09b545e92f0920b86
       Events:
         HttpApiEvent:
           Type: Api
